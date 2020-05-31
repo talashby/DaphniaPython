@@ -1,8 +1,11 @@
+
 import logging
 from tkinter import *
 import keyboard  # using module keyboard
 
 # creating tkinter window
+from ObserverClient import g_observer_client
+
 root = Tk()
 
 canvas = Canvas(width=1280, height=720, bg='black')
@@ -22,5 +25,6 @@ def func():
 
 
 root.after(10, func)
+g_observer_client.start_simulation()
 
 mainloop()
