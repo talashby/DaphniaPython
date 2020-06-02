@@ -29,23 +29,32 @@ class ObserverClient(object):
             # Ping to server
             addr = (self.SERVER_IP, port)
             message = MsgCheckVersion()
-            message.m_client_version = CommonParams.PROTOCOL_VERSION
-            message.m_observer_id = id(self)
+            message.m_clientVersion = CommonParams.PROTOCOL_VERSION
+            message.m_observerId = 0
             arr = message.get_buffer()
-            message2 = MsgCheckVersion.unpack(arr)
             # Send
             client_socket.sendto(arr, addr)
 
             # If data is received back from server, print
             try:
-                start = time.time()
-                data, server = client_socket.recvfrom(1024)
-                end = time.time()
-                elapsed = end - start
-                print(data + " " + elapsed)
-                # If data is not received back from server, print it has timed out
+                data, server = client_socket.recvfrom(CommonParams.DEFAULT_BUFLEN)
+                if data[0] == MsgType.CheckVersionResponse:
+                    received_array = bytearray(data)
+                    msg_receive = MsgCheckVersionResponse.from_buffer(received_array)
+                    if msg_receive.m_serverVersion == CommonParams.PROTOCOL_VERSION:
+                        break
+                    else:
+                        print('Wrong protocol')
+                        addr = None
+                        break
+
             except timeout:
                 print('REQUEST TIMED OUT')
+                addr = None
+
+        if addr != None:
+            addr = None
+
         return
 
 
