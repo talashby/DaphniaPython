@@ -33,8 +33,8 @@ def func():
         for xx in range(CommonParams.OBSERVER_EYE_SIZE):
             if eye_texture[yy][xx] != eye_color_array[yy][xx]:
                 cc = eye_texture[yy][xx]
-                color_rgb = (cc.m_colorR * cc.m_colorA // 256) * 65536 + (cc.m_colorG * cc.m_colorA // 256) * 256 + (
-                        cc.m_colorB * cc.m_colorA // 256)
+                color_rgb = (cc.m_colorR * cc.m_colorA // 255) * 65536 + (cc.m_colorG * cc.m_colorA // 255) * 256 + (
+                        cc.m_colorB * cc.m_colorA // 255)
                 hex_str = '#' + hex(color_rgb)[2:].zfill(6)
                 canvas.itemconfig(rect_canvas_array[yy][xx], fill=hex_str)
 

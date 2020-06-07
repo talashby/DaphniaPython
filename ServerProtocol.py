@@ -67,9 +67,9 @@ class EtherColor(Structure):
 
     _pack_ = 1
     _fields_ = [
-        ('m_colorR', c_uint8),
-        ('m_colorG', c_uint8),
         ('m_colorB', c_uint8),
+        ('m_colorG', c_uint8),
+        ('m_colorR', c_uint8),
         ('m_colorA', c_uint8),
     ]
 
