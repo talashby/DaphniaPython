@@ -1,16 +1,18 @@
-
 import logging
-from tkinter import *
+import tkinter as tk
 import keyboard  # using module keyboard
+import simpleaudio
 
 # creating tkinter window
 from ObserverClient import g_observer_client
 from ServerProtocol import CommonParams, EtherColor
 
-root = Tk()
+root = tk.Tk()
 
-canvas = Canvas(width=1280, height=720, bg='black')
-canvas.pack(expand=YES, fill=BOTH)
+canvas = tk.Canvas(width=1280, height=720, bg='black')
+canvas.pack(expand=tk.YES, fill=tk.BOTH)
+
+statistic_text = canvas.create_text(550, 50, fill="white", font="Times 20 italic bold", anchor="nw")
 
 # init eye color array
 eye_color_array = []
@@ -20,9 +22,10 @@ for yy in range(CommonParams.OBSERVER_EYE_SIZE):
     rect = []
     for xx in range(CommonParams.OBSERVER_EYE_SIZE):
         row_color.append(EtherColor(0, 0, 0))
-        rect.append(canvas.create_rectangle(xx*31, yy*31, xx*31+30, yy*31+30, width=5, fill='red'))
+        rect.append(canvas.create_rectangle(xx * 31, yy * 31, xx * 31 + 30, yy * 31 + 30, width=5, fill='red'))
     eye_color_array.append(row_color)
     rect_canvas_array.append(rect)
+
 
 def func():
     eye_texture = g_observer_client.get_eye_texture()
@@ -30,10 +33,37 @@ def func():
         for xx in range(CommonParams.OBSERVER_EYE_SIZE):
             if eye_texture[yy][xx] != eye_color_array[yy][xx]:
                 cc = eye_texture[yy][xx]
-                color_rgb = (cc.m_colorR * cc.m_colorA // 256) * 65536 + (cc.m_colorG * cc.m_colorA // 256) * 256 + (cc.m_colorB * cc.m_colorA // 256)
+                color_rgb = (cc.m_colorR * cc.m_colorA // 256) * 65536 + (cc.m_colorG * cc.m_colorA // 256) * 256 + (
+                        cc.m_colorB * cc.m_colorA // 256)
                 hex_str = '#' + hex(color_rgb)[2:].zfill(6)
                 canvas.itemconfig(rect_canvas_array[yy][xx], fill=hex_str)
 
+    # check crumb eaten
+    outPosition, outMovingProgress, outLatitude, outLongitude, outIsEatenCrumb = g_observer_client.get_state_ext_params()
+    if outIsEatenCrumb:
+        g_observer_client.grab_eaten_crumb_pos()
+        filename = 'bubble_pop.wav'
+        wave_obj = simpleaudio.WaveObject.from_wave_file(filename)
+        play_obj = wave_obj.play()
+
+    # statistics
+    quantumOfTimePerSecond, universeThreadsNum, tickTimeMusAverageUniverseThreadsMin, \
+    tickTimeMusAverageUniverseThreadsMax, tickTimeMusAverageObserverThread, \
+    clientServerPerformanceRatio, serverClientPerformanceRatio = g_observer_client.get_statistics_params()
+    strOut = "STATISTICS:"
+    strOut += "\nFPS (quantum of time per second): " + str(quantumOfTimePerSecond)
+    strOut += "\nUniverse threads count: " + str(universeThreadsNum)
+    if universeThreadsNum > 0:
+        strOut += "\nTick time(ms). Observer thread: " + str(tickTimeMusAverageObserverThread / 1000.0)
+        strOut += "\nTick time(ms). Fastest universe thread: " + str(tickTimeMusAverageUniverseThreadsMin / 1000.0)
+        strOut += "\nTick time(ms). Slowest universe thread: " + str(tickTimeMusAverageUniverseThreadsMax / 1000.0)
+    strOut += "\nClient-Server performance ratio: " + str(clientServerPerformanceRatio / 1000.0)
+    strOut += "\nServer-Client performance ratio: " + str(serverClientPerformanceRatio / 1000.0)
+    strOut += "\nPosition: (" + str(outPosition.m_posX) + ", " + str(outPosition.m_posY) + ", " + str(
+        outPosition.m_posZ) + ")"
+    strOut += "\nLattitude: " + str(outLatitude)
+    strOut += "\nLongitude: " + str(outLongitude)
+    canvas.itemconfig(statistic_text, text=strOut)
 
     try:  # used try so that if user pressed other than the given key error will not be shown
         left = keyboard.is_pressed('left')
@@ -56,4 +86,11 @@ def func():
 root.after(20, func)
 g_observer_client.start_simulation()
 
-mainloop()
+
+def on_closing():
+    g_observer_client.stop_simulation()
+    root.destroy()
+
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
+tk.mainloop()

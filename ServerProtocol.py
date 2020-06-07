@@ -46,6 +46,10 @@ class VectorInt32Math(Structure):
         self.m_posY = y_
         self.m_posZ = z_
 
+    @staticmethod
+    def ZeroVector():
+        return VectorInt32Math(0, 0, 0)
+
     _pack_ = 1
     _fields_ = [
         ('m_posX', c_uint32),
@@ -117,10 +121,10 @@ class MsgGetState(MsgBase):
         super().__init__(self.get_type())
 
 
-class MsgGetStateEx(MsgBase):
+class MsgGetStateExt(MsgBase):
     @staticmethod
     def get_type():
-        return MsgType.GetStateEx
+        return MsgType.GetStateExt
 
     def __init__(self):
         super().__init__(self.get_type())
