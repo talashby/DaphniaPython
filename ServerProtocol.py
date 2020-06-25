@@ -2,22 +2,24 @@ from typing import Final
 from ctypes import *
 
 
-class CommonParams:
-    MY_CONSTANT: Final = 12407
-
-    PROTOCOL_VERSION: Final = 1
-    DEFAULT_BUFLEN: Final = 512
-    CLIENT_UDP_PORT_START: Final = 50000
-    MAX_CLIENTS: Final = 10
-    OBSERVER_EYE_SIZE: Final = 16  # pixels
-
-
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
 
 
-# Animal = enum('ant', 'bee', 'cat', 'dog')
+class CommonParams:
+    MY_CONSTANT: Final = 12407
+
+    PROTOCOL_VERSION: Final = 2
+    DEFAULT_BUFLEN: Final = 512
+    CLIENT_UDP_PORT_START: Final = 50000
+    MAX_CLIENTS: Final = 10
+    OBSERVER_EYE_SIZE: Final = 16  # pixels
+    ObserverType = enum('NotAType',
+                        'Daphnia8x8',
+                        'Daphnia16x16'
+                        )
+
 
 MsgType = enum('CheckVersion',
                'GetStatistics',
@@ -99,7 +101,8 @@ class MsgCheckVersion(MsgBase):
 
     _fields_ = [
         ('m_clientVersion', c_uint32),
-        ('m_observerId', c_uint64)  # used to restore connection after restart client. If not need this send 0
+        ('m_observerId', c_uint64),  # used to restore connection after restart client. If not need this send 0
+        ('m_observerType', c_uint8)
     ]
 
 

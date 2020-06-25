@@ -9,6 +9,7 @@ from ServerProtocol import *
 class ObserverClient(object):
     def __init__(self):
         # constants
+        self.OBSERVER_TYPE: Final = CommonParams.ObserverType.Daphnia16x16
         self.SERVER_IP: Final = '127.0.0.1'
         self.EYE_IMAGE_DELAY: Final = 5000  # quantum of time. Eye inertia
         self.STATISTIC_REQUEST_PERIOD: Final = 900  # milliseconds
@@ -87,6 +88,7 @@ class ObserverClient(object):
             message = MsgCheckVersion()
             message.m_clientVersion = CommonParams.PROTOCOL_VERSION
             message.m_observerId = 0
+            message.m_observerType = self.OBSERVER_TYPE
             # Send
             self.client_socket.sendto(message.get_buffer(), self.addr)
 
